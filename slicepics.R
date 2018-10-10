@@ -1,23 +1,23 @@
-library(jpeg)
+library(imager)
 
 #GLOBAL VARIABLES
 source_dir <- "C:/Users/Alex/Documents/UNL East Sorghum 8-17-18/"
 output_dir <- "C:/Users/Alex/Documents/UNL East Sorghum 8-17-18 SmallPics/"
 number_of_row_subsets <- 5
-number_of_column_subsets <- 2
+number_of_column_subsets <- 5
 
-files <- list.files(path=source_dir, pattern="*", full.names=TRUE, recursive=FALSE)
+files <- list.files(path=source_dir, pattern="01[0-9]{2}", full.names=TRUE, recursive=FALSE)
 lapply(files, function(x) {
   
   #FILE NAME OF BASE PICTURE
   base_file_name <- gsub('.{4}$','',basename(x))
   
   #LOAD PICTURE INTO R,G,B MATRICES
-  jpg <- readJPEG(x)
+  full_jpg <- load.image(x)
   
   #SET UP SUBSETS OF PICTURE
-  rows <- dim(jpg)[1]
-  cols <- dim(jpg)[2]
+  cols <- dim(full_jpg)[1]
+  rows <- dim(full_jpg)[2]
   
   row_subset_size <- rows / number_of_row_subsets
   column_subset_size <- cols / number_of_column_subsets
@@ -25,8 +25,8 @@ lapply(files, function(x) {
   count <- 0
   
   #DIVIDE PICTURE INTO NUMBER_OF_ROW_SECTIONS X NUMBER_OF_COLUMN_SECTIONS SUBSETS
-  for(row_subset_index in c(0:(number_of_row_subsets-1))) {
-    for(col_subset_index in c(0:(number_of_column_subsets-1))) {
+  for(col_subset_index in c(0:(number_of_column_subsets-1))) {
+    for(row_subset_index in c(0:(number_of_row_subsets-1))) {
       
       top_row_index <- row_subset_size*row_subset_index + 1
       bottom_row_index <- row_subset_size*(row_subset_index + 1)
@@ -37,35 +37,14 @@ lapply(files, function(x) {
       count <- count + 1
       
       #CREATE PROPER FILENAME
-      outfile_name <- paste(base_file_name, '_', count, '.jpg', sep='')
+      outfile_name <- paste(base_file_name, '_', count, '.jpeg', sep='')
       full_path_outfile <- paste(output_dir, outfile_name)
       
       #SELECT SUBSET OF IMAGE
-      jpgDF <- jpg[c(top_row_index:bottom_row_index), c(left_col_index:right_col_index), c(1:3)]
+      jpg_subset <- imsub(full_jpg, x %inr% c(left_col_index,right_col_index), y %inr% c(top_row_index,bottom_row_index))
       
       #SAVE PIC
-      writeJPEG(jpgDF, target=full_path_outfile, quality=1.0)
-      
-      #OPTIONAL LOGGING, CHANGE TO IF(TRUE) TO LOG
-      if(FALSE) {
-        print(dim(jpg))  
-        print(count)  
-        print(x)
-        print(basename(x))
-        print(gsub('.{4}$','',basename(x)))
-        base_file_name = gsub('.{4}$','',basename(x))
-        cat("Outfile ,", paste(filename, '_', count, '.jpg', sep=''))
-        cat("Rows ", rows, "\n")
-        cat("Cols ", cols, "\n")
-        cat("RowIndex ", row_subset_index, "\n")
-        cat("col_subset_index ", col_subset_index, "\n")
-        cat("RowSectionSize ", row_subset_size, "\n")
-        cat("ColSectionSize ", column_subset_size, "\n")
-        cat("top_row_index ", top_row_index, "\n")
-        cat("bottom_row_index ", bottom_row_index, "\n")
-        cat("left_col_index ", left_col_index, "\n")
-        cat("right_col_index ", right_col_index, "\n")
-      }
+      save.image(jpg_subset, file=full_path_outfile, quality=1.0)
     }
   }
 })
