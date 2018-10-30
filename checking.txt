@@ -1,0 +1,43 @@
+50: GOOD 0084_5
+sorghum CHECK
+	682,711
+	395,668
+	258,671
+leaf CHECK
+	489,274
+	824,271
+	857,74
+not sorghum CHECK 
+	573,384
+	190,433
+	961,401
+
+53: GOOD 0141_20
+sorghum
+	none
+leaf
+	none
+not sorghum
+	265,530
+	586,264
+	387,185
+
+645: GOOD 0081_18
+sorghum GOOD
+	574,589 x
+	961,439 x
+	957,384 x
+	914,355 x
+	1014,119 x
+	927,117 x
+	904,27 x
+	240,130 x
+	933,530 x
+leaf GOOD
+	787,527
+	509,527
+	890,200
+not sorghum GOOD 
+	543,378
+	473,254
+	165,456

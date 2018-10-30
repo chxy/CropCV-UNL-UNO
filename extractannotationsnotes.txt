@@ -1,0 +1,45 @@
+classification_dataset = all data, 1 row = 1 picture
+annotations <- classification_dataset$annotations (column store click locations)
+annotations_json <- sapply(as.character(annotations), function(x) {
+  single_entry <- fromJSON(x) (library RJSONIO)
+})
+
+img_names <- as.character(classification_dataset$subject_data)
+img_names_json <- sapply(img_names, function(x) {
+	
+})
+
+-
+
+annotations_json[i] = i'th entry/picture in the dataset
+annotations_json[i][[1]] = data for i'th entry/picture (there is no [i][[2]], there is just the [[1]] index)
+
+annotations_json[i][[1]][[j]] = j'th task for i'th picture (j=0,1,2 = sorghum clicks, leaves clicks, ground clicks)
+
+
+annotations_json[i][[1]][[j]]$value = set of all click locations for the j'th task for i'th picture
+
+annotations_json[i][[1]][[j]]$value[[k]] = k'th click location for j'th task for i'th picture
+
+annotations_json[i][[1]][[j]]$value[[k]]$x = x coordinate for k'th click for j'th task for i'th picture
+annotations_json[i][[1]][[j]]$value[[k]]$y = y coordinate for k'th click for j'th task for i'th picture
+annotations_json[i][[1]][[j]]$task = name of j'th task
+
+img_names[i][[1]][[2]] = file name name of i'th image
+
+-
+
+I need to extract all x,y locations, and a label of which task and picture they were for
+
+Example output dataframe from extraction:
+x    y    task    img
+330  120  0       0084_1.jpg
+...
+650  500  1       0140_10.jpg
+...
+900  300  2       0093_12.jpg
+
+-
+
+3 layer deep sapply function?
+Triple for-loop?
