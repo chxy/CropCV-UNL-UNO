@@ -37,14 +37,14 @@ lapply(files, function(x) {
       count <- count + 1
       
       #CREATE PROPER FILENAME
-      outfile_name <- paste(base_file_name, '_', count, '.jpeg', sep='')
-      full_path_outfile <- paste(output_dir, outfile_name)
+      outfile_name <- paste0(base_file_name, '_', count, '.jpeg')
+      full_path_outfile <- paste0(output_dir, outfile_name)
       
       #SELECT SUBSET OF IMAGE
       jpg_subset <- imsub(full_jpg, x %inr% c(left_col_index,right_col_index), y %inr% c(top_row_index,bottom_row_index))
       
       #SAVE PIC
-      save.image(jpg_subset, file=full_path_outfile, quality=1.0)
+      imager::save.image(jpg_subset, file=full_path_outfile, quality=1.0)
     }
   }
 })

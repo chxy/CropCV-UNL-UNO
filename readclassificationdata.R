@@ -1,4 +1,6 @@
 library(RJSONIO)
+library(stringr)
+
 classifications_csv <- read.csv("generate-panicles-training-data-classifications.csv")
 
 sorghum_annotations_json <- sapply(as.character(classifications_csv$annotations), function(x) {
@@ -18,7 +20,7 @@ file_name_json <- sapply(subject_data, function(x) {
 file_name_vector <- sapply(file_name_json, function(x) {
   return(x[[2]])
 })
-file_name_vector <- basename(unname(file_name_vector))
+file_name_vector <- str_trim(basename(unname(file_name_vector)))
 
 annotations_df <- data.frame(filename=character(),
                              task_id=character(), 
@@ -45,7 +47,7 @@ for(i in 1:length(sorghum_annotations_json)) {
   }
 }
 
-write.csv(annotations_df, "sorghum_annotations.csv")
+write.csv(annotations_df, "sorghum_annotations.csv", row.names = FALSE)
 
 
 #Broken attempts at faster ways to parse difficult json data
