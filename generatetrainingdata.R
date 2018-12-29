@@ -1,27 +1,7 @@
 library(imager)
 
-source_dir <- "C:/Users/Alex/Documents/UNL East Sorghum 8-17-18 SmallPics/"
-output_dir_no_task <- "C:/Users/Alex/Documents/CropCV-TrainingData-"
-
-training_data_width <- 60
-training_data_height <- 60
-
-annotations <- read.csv("sorghum_annotations.csv")
-annotations$filename <- as.character(annotations$filename)
-annotations$task_id <- as.character(annotations$task_id)
-annotations$x_loc <- as.integer(annotations$x_loc)
-annotations$y_loc <- as.integer(annotations$y_loc)
-
-annotations$filename_fullpath <- paste0(source_dir,annotations$filename)
-
-unique_file_names <- unique(annotations$filename)
-
 #Save sorghum photos
-save_single_example <- function(jpeg,file,task,x,y,output_dir) {
-  jpeg <- image_read(jpeg)
-  file_name_no_ext <- gsub('.jpeg$','',file)
-  file_output <- paste0(output_dir,file_name_no_ext,'_',task,'_',x,'_',y,'.jpeg')
-  
+bounding_box <- function(jpeg,x,y) {
   cols <- image_info(jpeg)$height
   rows <- image_info(jpeg)$width
   
@@ -49,24 +29,52 @@ save_single_example <- function(jpeg,file,task,x,y,output_dir) {
     right_col <- cols
   }
   
-  jpg_subset <- image_crop(jpeg,geometry_area(training_data_width,training_data_height,left_col,top_row))
-  image_write(jpg_subset, path=file_output, quality=100)
+  return(c(left_col, top_row, right_col, bottom_row))
 }
 
+data_dir <- "C:/Users/Alex/CropCV-UNL-UNO/"
+data_file <- "sorghum_annotations.csv"
+source_dir <- "C:/Users/Alex/Documents/UNL East Sorghum 8-17-18 SmallPics/"
+output_dir <- "C:/Users/Alex/CropCV-UNL-UNO/train/annotations/"
 
-test_index <- 1
+training_data_width <- 60
+training_data_height <- 60
+
+input_data <- paste0(data_dir,data_file)
+annotations_t0 <- read.csv(input_data)
+annotations_t0 <- annotations_t0[which(annotations_t0$task_id=="T0"),]
+
+annotations_t0$filename <- as.character(annotations_t0$filename)
+annotations_t0$task_id <- as.character(annotations_t0$task_id)
+annotations_t0$x_loc <- as.integer(annotations_t0$x_loc)
+annotations_t0$y_loc <- as.integer(annotations_t0$y_loc)
+
+annotations_filecounts <- list()
+
+for(i in 1:nrow(annotations_t0)) {
+  input_file <- paste0(source_dir,annotations_t0[i,"filename"])
+  jpeg <- image_read(input_file)
+  coords <- bounding_box(jpeg,annotations_t0[i,"x_loc"],annotations_t0[i,"y_loc"])
   
-for(single_file in unique_file_names[test_index]) {
-  jpeg <- image_read(paste0(source_dir,single_file))
-  for(task in c("T0","T1","T2")) {
-    clicks_on_pic <- annotations[which(annotations$task_id==task & annotations$filename==single_file),]
-    output_dir <- paste0(output_dir_no_task,task,"/")
-    if(nrow(clicks_on_pic)>0) {
-      mapply(save_single_example,jpeg, clicks_on_pic$filename, task, clicks_on_pic$x_loc, clicks_on_pic$y_loc, output_dir)
-    }
-  } 
+  width <- coords[3]-coords[1]
+  height <- coords[4]-coords[2]
+  
+  jpeg <- image_modulate(jpeg, brightness=0, saturation=0)
+  jpeg_draw <- image_draw(jpeg)
+  rect(coords[1],coords[4],coords[3],coords[2],col="white",border=NA)
+  dev.off()
+  
+  base <- gsub('\\..{4}$','',basename(annotations_t0[i,"filename"]))
+  
+  if(is.null(annotations_filecounts[[base]])) {
+    annotations_filecounts[[base]] <- as.numeric(1)
+  } else {
+    
+    annotations_filecounts[[base]] <- as.numeric(annotations_filecounts[[base]])+1
+  }
+  
+  count <- annotations_filecounts[[base]]
+  
+  output_file <- paste0(output_dir,base,"_","flower","_",count,".jpeg")
+  image_write(jpeg_draw,output_file)
 }
-
-#mapply(save_single_example,annotations_t0$filename_fullpath, annotations_t0$filename, annotations_t0$task_id, annotations_t0$x_loc, annotations_t0$y_loc, output_dir_T0)
-#mapply(save_single_example,annotations_t1$filename_fullpath, annotations_t1$filename, annotations_t1$task_id, annotations_t1$x_loc, annotations_t1$y_loc, output_dir_T1)
-#mapply(save_single_example,annotations_t2$filename_fullpath, annotations_t2$filename, annotations_t2$task_id, annotations_t2$x_loc, annotations_t2$y_loc, output_dir_T2)
